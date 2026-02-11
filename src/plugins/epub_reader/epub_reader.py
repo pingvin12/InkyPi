@@ -2,12 +2,21 @@ import logging
 import os
 import textwrap
 
-import ebooklib
-from bs4 import BeautifulSoup
-from ebooklib import epub
 from PIL import Image, ImageDraw, ImageFont
 
 from plugins.base_plugin.base_plugin import BasePlugin
+
+try:
+    import ebooklib
+    from bs4 import BeautifulSoup
+    from ebooklib import epub
+except ModuleNotFoundError as error:
+    ebooklib = None
+    BeautifulSoup = None
+    epub = None
+    IMPORT_ERROR = error
+else:
+    IMPORT_ERROR = None
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +41,12 @@ INKY_7_COLOR_PALETTE = [
 
 class EpubReader(BasePlugin):
     def generate_image(self, settings, device_config):
+        if IMPORT_ERROR:
+            raise RuntimeError(
+                "Missing dependency for EPUB Reader plugin. "
+                "Install plugin requirements (ebooklib, beautifulsoup4) and restart InkyPi."
+            ) from IMPORT_ERROR
+
         epub_path = settings.get("epubFile")
         if not epub_path:
             raise RuntimeError("Upload an EPUB file to render.")
@@ -49,15 +64,37 @@ class EpubReader(BasePlugin):
         if not pages:
             raise RuntimeError("No readable text was found in this EPUB.")
 
-        page_index = int(settings.get("pageIndex", 0))
-        if page_index >= len(pages):
-            page_index = 0
+        page_index, should_advance = self._resolve_page_index(settings, len(pages))
 
         page_text = pages[page_index]
-        settings["pageIndex"] = (page_index + 1) % len(pages)
+        if should_advance:
+            settings["pageIndex"] = (page_index + 1) % len(pages)
 
         image = self._render_page(page_text, font_size=font_size)
         return self._convert_to_inky_palette(image)
+
+    def _resolve_page_index(self, settings, total_pages):
+        selected_page = settings.get("selectedPage")
+        if selected_page not in (None, ""):
+            try:
+                selected_page_index = int(selected_page) - 1
+            except (TypeError, ValueError):
+                selected_page_index = 0
+
+            selected_page_index = max(0, min(selected_page_index, total_pages - 1))
+            return selected_page_index, False
+
+        try:
+            page_index = int(settings.get("pageIndex", 0))
+        except (TypeError, ValueError):
+            page_index = 0
+
+        if page_index >= total_pages:
+            page_index = 0
+        elif page_index < 0:
+            page_index = 0
+
+        return page_index, True
 
     def _extract_text_in_reading_order(self, epub_path):
         book = epub.read_epub(epub_path)

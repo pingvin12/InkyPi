@@ -4,6 +4,12 @@
 </div>
 
 <div class="form-group">
+    <label for="selectedPage" class="form-label">Page to Render (optional)</label>
+    <input type="number" id="selectedPage" name="selectedPage" class="form-input" value="" min="1" step="1" placeholder="Leave blank to auto-advance">
+    <p class="form-helper-text">Set a fixed page number to render. Leave blank to continue auto-advancing pages.</p>
+</div>
+
+<div class="form-group">
     <label for="epubUpload" class="form-input file-upload-label">Choose EPUB</label>
     <input
         type="file"
@@ -64,6 +70,7 @@
         }
 
         document.getElementById('fontSize').value = pluginSettings.fontSize || 28;
+        document.getElementById('selectedPage').value = pluginSettings.selectedPage || "";
 
         const existingFilePath = pluginSettings.epubFile;
         if (!existingFilePath) {
