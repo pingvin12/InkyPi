@@ -1,0 +1,31 @@
+<div class="form-group">
+    <label for="markdownInput" class="form-label">Markdown Content:</label>
+    <div class="row" style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-outline-secondary" onclick="insertMarkdown('**', '**')"><b>B</b></button>
+        <button type="button" class="btn btn-outline-secondary" onclick="insertMarkdown('*', '*')"><i>I</i></button>
+        <button type="button" class="btn btn-outline-secondary" onclick="insertMarkdown('`', '`')">Code</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="insertMarkdown('![alt text](', ')')">PNG</button>
+        <button type="button" class="btn btn-outline-secondary" onclick="insertMarkdown('[link text](', ')')">Link</button>
+    </div>
+    <textarea id="markdownInput" name="markdown_input" class="form-input" rows="14" required
+        placeholder="# Title\nWrite markdown text here...\n\n![alt](https://example.com/image.png)"></textarea>
+</div>
+
+<script>
+    function insertMarkdown(prefix, suffix) {
+        const textarea = document.getElementById('markdownInput');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selected = textarea.value.substring(start, end);
+        const replacement = `${prefix}${selected}${suffix}`;
+
+        textarea.setRangeText(replacement, start, end, 'end');
+        textarea.focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (loadPluginSettings) {
+            document.getElementById('markdownInput').value = pluginSettings.markdown_input || '';
+        }
+    });
+</script>
