@@ -45,7 +45,7 @@ def resolve_path(file_path):
     if src_dir is None:
         # Default to the src directory
         src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
+
     src_path = Path(src_dir)
     return str(src_path / file_path)
 
@@ -143,7 +143,7 @@ def parse_form(request_form):
     return request_dict
 
 def handle_request_files(request_files, form_data={}):
-    allowed_file_extensions = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'heif', 'heic'}
+    allowed_file_extensions = {'pdf', 'epub', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'heif', 'heic'}
     file_location_map = {}
     # handle existing file locations being provided as part of the form data
     for key in set(request_files.keys()):

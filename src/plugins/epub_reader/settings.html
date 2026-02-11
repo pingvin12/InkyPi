@@ -1,0 +1,88 @@
+<div class="form-group">
+    <label for="fontSize" class="form-label">Font Size</label>
+    <input type="number" id="fontSize" name="fontSize" class="form-input" value="28" min="14" max="64">
+</div>
+
+<div class="form-group">
+    <label for="epubUpload" class="form-input file-upload-label">Choose EPUB</label>
+    <input
+        type="file"
+        clear-on-submit
+        id="epubUpload"
+        name="epubFile"
+        accept=".epub,application/epub+zip"
+        class="file-upload-input"
+        onchange="addFile()"
+    >
+</div>
+
+<div class="form-group">
+    <div id="fileName" class="file-name-list"></div>
+</div>
+
+<div id="hiddenFileInput"></div>
+
+<script>
+    function addFile() {
+        const fileInput = document.getElementById("epubUpload");
+        const fileNameDisplay = document.getElementById("fileName");
+
+        if (!fileInput.files.length) {
+            return;
+        }
+
+        const file = fileInput.files[0];
+        uploadedFiles["epubFile"] = file;
+
+        fileNameDisplay.innerHTML = `
+            <div class="file-name" id="uploaded-epub">
+                <span id="fileNameText">${file.name}</span>
+                <button type="button" class="remove-btn" onclick="removeUploadedFile()">X</button>
+            </div>
+        `;
+    }
+
+    function removeUploadedFile() {
+        delete uploadedFiles["epubFile"];
+        document.getElementById("fileName").innerHTML = "";
+    }
+
+    function removeExistingFile() {
+        const existing = document.getElementById("existing-epub");
+        const hidden = document.getElementById("hidden-epub");
+        if (existing) {
+            existing.remove();
+        }
+        if (hidden) {
+            hidden.remove();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!loadPluginSettings) {
+            return;
+        }
+
+        document.getElementById('fontSize').value = pluginSettings.fontSize || 28;
+
+        const existingFilePath = pluginSettings.epubFile;
+        if (!existingFilePath) {
+            return;
+        }
+
+        const fileNameDisplay = document.getElementById("fileName");
+        const hiddenFileInput = document.getElementById("hiddenFileInput");
+        const fileName = existingFilePath.split('/').pop();
+
+        fileNameDisplay.innerHTML = `
+            <div class="file-name" id="existing-epub" delete-on-submit>
+                <span id="fileNameText">${fileName}</span>
+                <button type="button" class="remove-btn" onclick="removeExistingFile()">X</button>
+            </div>
+        `;
+
+        hiddenFileInput.innerHTML = `
+            <input type="hidden" id="hidden-epub" name="epubFile" value="${existingFilePath}" delete-on-submit>
+        `;
+    });
+</script>

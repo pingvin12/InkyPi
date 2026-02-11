@@ -1,0 +1,5 @@
+{
+    "display_name": "EPUB Reader",
+    "id": "epub_reader",
+    "class": "EpubReader"
+}
